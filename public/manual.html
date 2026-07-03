@@ -1,0 +1,402 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>PCB Gerber Aligner 使用说明书</title>
+    <style>
+      :root {
+        color-scheme: light;
+        font-family:
+          "Microsoft YaHei UI", "Microsoft YaHei", "Segoe UI", system-ui, -apple-system, sans-serif;
+        color: #172033;
+        background: #f4f7fb;
+      }
+
+      * {
+        box-sizing: border-box;
+      }
+
+      body {
+        margin: 0;
+        background:
+          linear-gradient(180deg, #edf6ff 0, #f8fafc 260px),
+          #f8fafc;
+      }
+
+      main {
+        max-width: 1040px;
+        margin: 0 auto;
+        padding: 34px 34px 52px;
+      }
+
+      header {
+        margin-bottom: 30px;
+      }
+
+      h1 {
+        margin: 0 0 10px;
+        font-size: 30px;
+        line-height: 1.18;
+        color: #0f172a;
+      }
+
+      .lead {
+        max-width: 780px;
+        margin: 0;
+        color: #475569;
+        font-size: 15px;
+        line-height: 1.8;
+      }
+
+      .toc,
+      section {
+        border: 1px solid #dbe5f2;
+        border-radius: 8px;
+        background: rgba(255, 255, 255, 0.92);
+        box-shadow: 0 12px 32px rgba(15, 23, 42, 0.06);
+      }
+
+      .toc {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+        gap: 8px;
+        padding: 14px;
+        margin-bottom: 18px;
+      }
+
+      .toc a {
+        display: block;
+        padding: 9px 10px;
+        border-radius: 6px;
+        color: #0f766e;
+        text-decoration: none;
+        font-weight: 650;
+        font-size: 13px;
+      }
+
+      .toc a:hover {
+        background: #ecfeff;
+      }
+
+      section {
+        padding: 24px;
+        margin-top: 18px;
+      }
+
+      h2 {
+        margin: 0 0 14px;
+        color: #0f172a;
+        font-size: 20px;
+      }
+
+      h3 {
+        margin: 20px 0 8px;
+        color: #1e293b;
+        font-size: 15px;
+      }
+
+      p,
+      li {
+        color: #475569;
+        font-size: 14px;
+        line-height: 1.78;
+      }
+
+      ol,
+      ul {
+        margin: 0;
+        padding-left: 22px;
+      }
+
+      li + li {
+        margin-top: 6px;
+      }
+
+      kbd,
+      code {
+        border: 1px solid #d1dce8;
+        border-radius: 5px;
+        background: #f1f5f9;
+        color: #0f172a;
+        font-family: "Cascadia Mono", Consolas, monospace;
+        font-size: 12px;
+      }
+
+      kbd {
+        padding: 2px 6px;
+      }
+
+      code {
+        padding: 2px 5px;
+      }
+
+      .grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+        gap: 12px;
+      }
+
+      .note {
+        border-left: 4px solid #14b8a6;
+        background: #ecfeff;
+        padding: 12px 14px;
+        border-radius: 6px;
+        color: #115e59;
+      }
+
+      .warning {
+        border-left-color: #f59e0b;
+        background: #fffbeb;
+        color: #92400e;
+      }
+
+      table {
+        width: 100%;
+        border-collapse: collapse;
+        margin-top: 12px;
+        overflow: hidden;
+        border: 1px solid #dbe5f2;
+        border-radius: 8px;
+      }
+
+      th,
+      td {
+        padding: 10px 12px;
+        border-bottom: 1px solid #e5edf6;
+        text-align: left;
+        vertical-align: top;
+        font-size: 13px;
+      }
+
+      th {
+        background: #f1f5f9;
+        color: #334155;
+      }
+
+      td {
+        color: #475569;
+      }
+
+      tr:last-child td {
+        border-bottom: 0;
+      }
+
+      @media (max-width: 720px) {
+        main {
+          padding: 22px 14px 36px;
+        }
+
+        section {
+          padding: 18px;
+        }
+
+        h1 {
+          font-size: 24px;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <main>
+      <header>
+        <h1>PCB Gerber Aligner 使用说明书</h1>
+        <p class="lead">
+          本软件用于把 PCB Gerber 线路层和抄板打磨扫描图叠加对齐，辅助检查线路、焊盘、过孔和钻孔位置是否一致。所有文件都在本机读取和显示，不会上传到外部服务器。
+        </p>
+      </header>
+
+      <nav class="toc" aria-label="目录">
+        <a href="#workflow">快速流程</a>
+        <a href="#import">导入与更新</a>
+        <a href="#layers">图层和组合</a>
+        <a href="#canvas">画布操作</a>
+        <a href="#alignment">对齐方法</a>
+        <a href="#extraction">扫描提取</a>
+        <a href="#analysis">偏差显示</a>
+        <a href="#tips">常见问题</a>
+      </nav>
+
+      <section id="workflow">
+        <h2>1. 快速流程</h2>
+        <ol>
+          <li>点击 <strong>Gerber 路径</strong>，选择 Gerber 输出目录。</li>
+          <li>点击 <strong>导入 Gerber</strong>，读取该目录下的线路层、外形层和钻孔层。</li>
+          <li>点击 <strong>扫描路径</strong>，选择打磨扫描图目录。</li>
+          <li>点击 <strong>导入扫描</strong>，读取扫描图，软件会按文件名自动匹配图层组合。</li>
+          <li>先使用 <strong>自动对齐</strong> 得到初始缩放和位移，再用右侧 X、Y、缩放、角度控件微调。</li>
+          <li>需要更高精度时，使用 <strong>划线配准</strong>，分别在 Gerber 和扫描图上画同一条参考线，然后点击 <strong>应用</strong>。</li>
+          <li>点击 <strong>提取</strong>，使用 <strong>吸管抠图</strong> 在扫描图线路颜色上取样，微调提取效果。</li>
+          <li>提取区域确认后，再点击 <strong>分析</strong>，切换到偏差显示模式查看未覆盖区域。</li>
+        </ol>
+      </section>
+
+      <section id="import">
+        <h2>2. 导入与文件更新</h2>
+        <div class="grid">
+          <div>
+            <h3>Gerber 路径</h3>
+            <p>只选择并保存 Gerber 目录，不会立即导入。目录会持久化，下次打开软件时仍会记住。</p>
+          </div>
+          <div>
+            <h3>导入 Gerber</h3>
+            <p>从已保存的 Gerber 目录重新读取最新文件。设计软件重新输出 Gerber 后，直接点此按钮即可刷新结果。</p>
+          </div>
+          <div>
+            <h3>扫描路径</h3>
+            <p>只选择并保存扫描图目录。建议扫描图文件名包含层号或可识别的层信息，例如 <code>layer-3.jpg</code>。</p>
+          </div>
+          <div>
+            <h3>导入扫描</h3>
+            <p>从已保存的扫描目录读取图片。重新导入扫描图时会保留与每张图绑定的划线和对齐参数。</p>
+          </div>
+        </div>
+        <p class="note">
+          Gerber 重新导入时，软件会先保存当前扫描图的对齐参数。只要扫描图没有变化，刷新 Gerber 后通常不需要重新标定。
+        </p>
+      </section>
+
+      <section id="layers">
+        <h2>3. 图层和自动组合</h2>
+        <ul>
+          <li>左侧图层列表可以开关每个 Gerber 层，并调节单层透明度。</li>
+          <li>软件会识别常见铜层、阻焊、钢网、丝印、外形、机械层和钻孔层。</li>
+          <li><code>.TX1</code>、<code>.TX2</code>、<code>.DRL</code>、<code>.XLN</code>、<code>.NC</code> 等 Excellon 钻孔文件会按钻孔层导入。</li>
+          <li>选择扫描图后，软件会根据扫描图名称自动切换对应的线路层组合。</li>
+        </ul>
+      </section>
+
+      <section id="canvas">
+        <h2>4. 主操作区</h2>
+        <table>
+          <thead>
+            <tr>
+              <th>操作</th>
+              <th>作用</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>鼠标滚轮</td>
+              <td>以鼠标位置为中心缩放画布。</td>
+            </tr>
+            <tr>
+              <td>鼠标拖动空白处</td>
+              <td>平移画布视图。</td>
+            </tr>
+            <tr>
+              <td>双击画布</td>
+              <td>重置视图缩放和平移。</td>
+            </tr>
+            <tr>
+              <td><kbd>V</kbd></td>
+              <td>在编辑模式下快速切换 Gerber 100% 显示和扫描图 100% 显示，用于单独观察两张图。</td>
+            </tr>
+            <tr>
+              <td><kbd>Esc</kbd></td>
+              <td>退出单图显示状态，说明书打开时也可关闭说明书。</td>
+            </tr>
+          </tbody>
+        </table>
+      </section>
+
+      <section id="alignment">
+        <h2>5. 对齐方法</h2>
+        <h3>自动对齐</h3>
+        <p>点击右侧 <strong>自动对齐</strong> 后，软件会根据当前可见线路层和扫描图计算初始缩放、位移和偏差结果。自动对齐适合先给出大致位置。</p>
+
+        <h3>手动微调</h3>
+        <ul>
+          <li><strong>X / Y</strong>：调整扫描图相对 Gerber 的水平和垂直偏移。</li>
+          <li><strong>缩放</strong>：调整扫描图比例，步进为 0.002，适合精细校正。</li>
+          <li><strong>角度</strong>：调整扫描图旋转角度。</li>
+          <li><strong>扫描透明度</strong>：控制扫描图叠加透明度，便于观察重合关系。</li>
+        </ul>
+
+        <h3>划线配准</h3>
+        <ol>
+          <li>点击 <strong>Gerber 线</strong>，在 Gerber 上沿同一条线段画参考线。</li>
+          <li>点击 <strong>扫描线</strong>，在扫描图上画对应的参考线。</li>
+          <li>线段端点是十字准星，可拖动端点或整条线二次调整。</li>
+          <li>放大画线时，把端点拖到绘图区边缘，视图会自动平移，方便高精度定位。</li>
+          <li>两条线都确认后，点击 <strong>应用</strong> 才会真正执行配准。</li>
+        </ol>
+      </section>
+
+      <section id="extraction">
+        <h2>6. 扫描区域提取</h2>
+        <p>点击顶部工具栏的 <strong>提取</strong>，主视窗会进入扫描提取预览模式。此模式只处理扫描图，不与 Gerber 比较。建议先把提取区域调到准确，再点击 <strong>分析</strong> 生成偏差图。</p>
+        <h3>推荐：吸管抠图</h3>
+        <ol>
+          <li>在右侧 <strong>扫描提取</strong> 中选择 <strong>吸管抠图</strong>。</li>
+          <li>点击 <strong>吸管取色</strong>，在主视窗中点击需要提取的线路、孔环或铜面颜色。</li>
+          <li>观察青色覆盖区域。青色区域就是后续偏差分析会使用的扫描图 mask。</li>
+          <li>先调 <strong>抠图容差</strong> 和 <strong>边缘柔化</strong>，再根据需要微调 <strong>色度权重</strong>、<strong>亮度权重</strong> 和 <strong>遮罩阈值</strong>。</li>
+          <li>边缘有碎点时提高 <strong>去噪强度</strong>；细线断开时少量增加 <strong>区域膨胀</strong>。</li>
+        </ol>
+        <h3>参数说明</h3>
+        <ul>
+          <li><strong>吸管抠图</strong>：按取样颜色生成软遮罩，适合扫描图颜色不均、边缘有渐变或反光的情况。</li>
+          <li><strong>抠图容差</strong>：允许与取样颜色偏离的范围。越大，提取区域越多。</li>
+          <li><strong>边缘柔化</strong>：控制边缘过渡宽度。越大，边缘越连续，但可能吃进背景。</li>
+          <li><strong>色度权重 / 亮度权重</strong>：分别控制颜色差异和明暗差异的重要性。线路颜色接近但明暗变化大时，可降低亮度权重。</li>
+          <li><strong>遮罩阈值</strong>：把软遮罩转换成分析用二值区域的分界线。</li>
+          <li><strong>取样半径</strong>：吸管取色时平均周围像素，半径大可降低扫描噪声影响。</li>
+          <li><strong>暗色区域</strong>：适合打磨图上深色线路、孔环、边界线。</li>
+          <li><strong>色彩范围</strong>：按色相、饱和度、亮度筛选指定颜色区域。</li>
+          <li><strong>亮度阈值 / 自适应阈值</strong>：控制暗色区域被选中的范围。</li>
+          <li><strong>色相、饱和度、亮度范围</strong>：用于精细框选扫描图中的特定颜色。</li>
+          <li><strong>排除绿区</strong>：避免阻焊残留、绿色底板区域被误判为线路。</li>
+          <li><strong>去噪强度</strong>：过滤孤立噪点；数值过高可能吃掉细线。</li>
+          <li><strong>区域膨胀</strong>：适当扩大提取区域，补偿扫描图边缘断裂或轻微误差。</li>
+        </ul>
+        <p class="note">提取模式左下角会显示快捷键提示。调参时预览会实时刷新，刷新完成后再进入偏差分析。</p>
+      </section>
+
+      <section id="analysis">
+        <h2>7. 偏差显示</h2>
+        <p>点击 <strong>分析</strong> 后，主视窗会切换到偏差显示模式。工具栏中的 <strong>编辑</strong> 和 <strong>偏差</strong> 按钮可在普通叠加视图和偏差图之间切换。</p>
+        <table>
+          <thead>
+            <tr>
+              <th>颜色</th>
+              <th>含义</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>浅绿色</td>
+              <td>Gerber 与扫描图重合区域。</td>
+            </tr>
+            <tr>
+              <td>红色</td>
+              <td>Gerber 有线路或焊盘，但扫描图未覆盖的位置。</td>
+            </tr>
+            <tr>
+              <td>蓝色</td>
+              <td>扫描图中多出的区域，可能是实物痕迹、噪声、残铜或未匹配图形。</td>
+            </tr>
+          </tbody>
+        </table>
+        <p class="note warning">
+          偏差图依赖扫描图清晰度、阈值、透明度和当前可见图层。分析前建议先关闭不相关图层，只保留当前扫描图对应的线路层和必要钻孔层。
+        </p>
+      </section>
+
+      <section id="tips">
+        <h2>8. 常见问题</h2>
+        <h3>更新 Gerber 后是否要重新标定？</h3>
+        <p>通常不需要。先保持扫描图不变，点击 <strong>导入 Gerber</strong> 重新读取最新 Gerber，软件会继续使用当前扫描图绑定的对齐参数。</p>
+
+        <h3>自动对齐结果不准怎么办？</h3>
+        <p>先确认扫描图方向和 Gerber 方向一致，再手动把缩放调到接近值，最后用划线配准。画线时尽量选择长而清晰的直线，例如板边、长走线或排针中心线。</p>
+
+        <h3>孔位或钻孔层偏移怎么办？</h3>
+        <p>确认 Gerber 目录中包含钻孔文件，例如 <code>.TX1</code>、<code>.TX2</code>、<code>.DRL</code>。导入后左侧筛选到钻孔层，检查钻孔层是否已勾选显示。</p>
+
+        <h3>长时间使用后变卡怎么办？</h3>
+        <p>优先关闭不需要的图层和扫描图，避免同时显示过多大尺寸图层。重新导入扫描图时，软件会释放旧图片缓存；如果系统显存压力较大，也可以重启软件释放资源。</p>
+      </section>
+    </main>
+  </body>
+</html>

@@ -1,0 +1,39 @@
+{
+  "name": "pcb-gerber-aligner",
+  "description": "Desktop tool for aligning PCB Gerber layers with scanned board images.",
+  "private": false,
+  "version": "0.0.0",
+  "license": "MIT",
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "tsc -b && vite build",
+    "lint": "oxlint",
+    "preview": "vite preview",
+    "tauri": "tauri",
+    "tauri:dev": "tauri dev",
+    "tauri:build": "tauri build",
+    "test": "npm run lint && npm run build"
+  },
+  "dependencies": {
+    "@tauri-apps/api": "^2.11.0",
+    "buffer": "^6.0.3",
+    "events": "^3.3.0",
+    "gerber-to-svg": "^4.2.8",
+    "lucide-react": "^1.22.0",
+    "process": "^0.11.10",
+    "react": "^19.2.7",
+    "react-dom": "^19.2.7",
+    "util": "^0.12.5"
+  },
+  "devDependencies": {
+    "@tauri-apps/cli": "^2.11.4",
+    "@types/node": "^24.13.2",
+    "@types/react": "^19.2.17",
+    "@types/react-dom": "^19.2.3",
+    "@vitejs/plugin-react": "^6.0.2",
+    "oxlint": "^1.69.0",
+    "typescript": "~6.0.2",
+    "vite": "^8.1.0"
+  }
+}
